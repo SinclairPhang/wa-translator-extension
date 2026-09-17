@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "WhatsApp Send Translator",
+  "version": "1.0.0",
+  "description": "Translate Chinese text before sending messages in WhatsApp Web.",
+  "permissions": [
+    "storage",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "https://web.whatsapp.com/*",
+    "https://api.openai.com/*",
+    "https://api.deepseek.com/*",
+    "https://api.elevenlabs.io/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://web.whatsapp.com/*"
+      ],
+      "js": [
+        "settings.js",
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "WhatsApp Send Translator",
+    "default_popup": "popup/popup.html"
+  }
+}

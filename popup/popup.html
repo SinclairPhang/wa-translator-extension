@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>WhatsApp 翻译助手</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main>
+      <header>
+        <h1>WhatsApp 翻译助手</h1>
+        <label class="switch" title="启用插件"><input id="enabled" type="checkbox"><span></span></label>
+      </header>
+
+      <p id="chatScope" style="font-size:12px;line-height:1.5"></p>
+      <label>翻译服务
+        <select id="provider">
+          <option value="none">不翻译</option><option value="openai">OpenAI</option><option value="deepseek">DeepSeek</option>
+        </select>
+      </label>
+      <label>目标语言
+        <select id="targetLanguage">
+          <option value="French">法语</option><option value="English">英语</option>
+          <option value="Portuguese">葡萄牙语</option><option value="Spanish">西班牙语</option>
+          <option value="Arabic">阿拉伯语</option><option value="Lingala">林加拉语</option>
+          <option value="Swahili">斯瓦希里语</option><option value="none">不翻译</option><option value="custom">自定义</option>
+        </select>
+      </label>
+      <label id="customLanguageRow" hidden>自定义语言<input id="customLanguage" type="text" placeholder="例如：Congolese French"></label>
+
+      <section id="openaiSection" class="api-panel"><p id="openaiModelStatus" style="font-size:12px;line-height:1.5" role="status"></p>
+        <h2>OpenAI API 设置 <span class="provider-state"></span></h2>
+        <label>OpenAI API Key<input id="openaiApiKey" type="password" autocomplete="off" placeholder="sk-..."></label>
+        <label>OpenAI 模型
+          <select id="openaiModel"><option value="">请填写 API Key 后加载模型</option><option value="custom">自定义模型...</option></select>
+        </label>
+        <label id="openaiCustomModelRow" hidden>自定义 OpenAI 模型
+          <input id="openaiCustomModel" type="text" spellcheck="false" placeholder="输入模型 ID">
+        </label>
+      </section>
+      <section id="deepseekSection" class="api-panel"><p id="deepseekModelStatus" style="font-size:12px;line-height:1.5" role="status"></p>
+        <h2>DeepSeek API 设置 <span class="provider-state"></span></h2>
+        <label>DeepSeek API Key<input id="deepseekApiKey" type="password" autocomplete="off" placeholder="sk-..."></label>
+        <label>DeepSeek 模型
+          <select id="deepseekModel"><option value="">请填写 API Key 后加载模型</option></select>
+        </label>
+      </section>
+      <label>发送模式
+        <select id="sendMode"><option value="auto">翻译后自动发送</option><option value="preview">替换为译文，手动发送</option></select>
+      </label>
+      <label class="checkbox"><input id="appendOriginal" type="checkbox"><span>附带中文原文</span></label>
+
+      <section class="speech-panel">
+        <h2>发音设置</h2>
+        <label>为此语言设置声音
+          <select id="voiceLanguage">
+            <option value="french">法语</option><option value="english">英语</option>
+            <option value="chinese">中文（收到消息的译文）</option>
+            <option value="portuguese">葡萄牙语</option><option value="spanish">西班牙语</option>
+            <option value="arabic">阿拉伯语</option><option value="lingala">林加拉语</option>
+            <option value="swahili">斯瓦希里语</option>
+          </select>
+        </label>
+        <p style="font-size:12px;line-height:1.5;color:#667781">每种语言分别记住三种引擎的声音。选好后点击底部“保存设置”；切换聊天栏的目标语言时，朗读自动使用对应声音。未配置的语言沿用原声音。</p>
+        <label>语音引擎
+          <select id="speechEngine"><option value="browser">浏览器 / Windows（免费）</option><option value="elevenlabs">ElevenLabs 在线语音</option><option value="openai">OpenAI · GPT-4o mini TTS</option></select>
+        </label>
+        <p id="openaiSpeechNote" hidden style="font-size:12px;line-height:1.5">使用 OpenAI API Key，模型 gpt-4o-mini-tts。声音由 AI 生成，按 API 用量计费。</p><div id="elevenLabsSection" hidden>
+          <label>ElevenLabs API Key<input id="elevenLabsApiKey" type="password" autocomplete="off"></label>
+          <label>模型
+            <select id="elevenLabsModel"><option value="eleven_multilingual_v2">Multilingual v2（质量优先）</option><option value="eleven_flash_v2_5">Flash v2.5（速度优先）</option></select>
+          </label>
+          <button id="loadVoices" class="secondary" type="button">加载在线语音</button>
+        </div>
+        <label>声音偏好
+          <select id="speechGender"><option value="any">不限</option><option value="female">女声</option><option value="male">男声</option></select>
+        </label>
+        <label>具体语音<select id="speechVoiceURI"><option value="">自动选择</option></select></label>
+        <label class="range-row">语速 <output id="speechRateValue">1.0×</output><input id="speechRate" type="range" min="0.5" max="2" step="0.1"></label>
+        <label id="pitchRow" class="range-row">音调 <output id="speechPitchValue">1.0</output><input id="speechPitch" type="range" min="0.5" max="2" step="0.1"></label>
+        <button id="previewVoice" class="secondary" type="button">▶ 试听</button>
+      </section>
+
+      <footer><button id="save" type="button">保存设置</button><span id="status" role="status"></span></footer>
+    </main>
+    <script src="../defaults.js"></script>
+    <script src="../settings.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>

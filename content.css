@@ -1,0 +1,180 @@
+#wa-translator-toast {
+  position: fixed;
+  right: 18px;
+  bottom: 92px;
+  z-index: 2147483647;
+  max-width: min(360px, calc(100vw - 36px));
+  padding: 10px 12px;
+  border: 1px solid rgba(17, 27, 33, 0.12);
+  border-radius: 8px;
+  background: #ffffff;
+  color: #111b21;
+  box-shadow: 0 12px 36px rgba(17, 27, 33, 0.2);
+  font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+#wa-translator-toast.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+#wa-translator-toast[data-type="success"] {
+  border-color: rgba(24, 150, 92, 0.24);
+}
+
+#wa-translator-toast[data-type="error"] {
+  border-color: rgba(201, 54, 54, 0.28);
+  color: #8f1d1d;
+}
+
+html[data-wa-translator-busy="true"] footer {
+  cursor: progress;
+}
+
+/* Keep all controls in normal flow, inside their owning message/composer. */
+#wa-translator-controls {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  flex: 0 0 100%;
+  box-sizing: border-box;
+  padding: 8px 12px 10px;
+}
+
+#wa-translator-controls button,
+#wa-translator-controls select {
+  box-sizing: border-box;
+  height: 34px;
+  margin: 0;
+  border: 1px solid rgba(17, 27, 33, .12);
+  border-radius: 9px;
+  background: #fff;
+  color: #34454c;
+  padding: 0 12px;
+  font: 500 12px/1.2 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+#wa-translator-controls select {
+  margin-right: auto;
+  min-width: 96px;
+  max-width: 160px;
+}
+
+#wa-translator-controls button:hover { background: #eef5f2; }
+#wa-translator-controls button[data-primary="true"] {
+  background: #087f65;
+  border-color: #087f65;
+  color: #fff;
+  font-weight: 600;
+}
+#wa-translator-controls button[data-primary="true"]:hover { background: #066b55; }
+
+.wa-translator-message-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  clear: both;
+  width: fit-content;
+  max-width: 100%;
+  box-sizing: border-box;
+  margin: 8px 0 4px;
+  padding: 0;
+}
+
+.wa-translator-message-actions button,
+.wa-translator-message-result .wa-translator-speak-button {
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  min-height: 26px;
+  margin: 0;
+  padding: 4px 9px;
+  border: 1px solid rgba(8, 127, 101, .14);
+  border-radius: 7px;
+  background: rgba(8, 127, 101, .055);
+  color: #08775e;
+  font: 500 11px/16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+.wa-translator-message-actions button:hover,
+.wa-translator-message-result .wa-translator-speak-button:hover {
+  background: rgba(8, 127, 101, .12);
+  border-color: rgba(8, 127, 101, .28);
+}
+
+#wa-translator-controls :is(button, select):focus-visible,
+.wa-translator-message-actions button:focus-visible,
+.wa-translator-speak-button:focus-visible {
+  outline: 2px solid #087f65;
+  outline-offset: 2px;
+}
+
+.wa-translator-message-actions button:disabled,
+#wa-translator-controls button:disabled { cursor: progress; opacity: .55; }
+
+.wa-translator-message-result {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  box-sizing: border-box;
+  max-width: 100%;
+  margin: 8px 0 6px;
+  padding: 9px 10px;
+  border-left: 2px solid #50a58c;
+  border-radius: 0 8px 8px 0;
+  background: rgba(8, 127, 101, .055);
+  color: #34454c;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font: 12px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+.wa-translator-message-result[hidden] { display: none; }
+.wa-translator-message-result-text { flex: 1; min-width: 0; }
+.wa-translator-message-result .wa-translator-speak-button { min-width: 26px; padding: 4px 7px; }
+
+@media (max-width: 520px) {
+  #wa-translator-controls { gap: 6px; padding: 6px 4px 8px; }
+  #wa-translator-controls button { padding: 0 9px; }
+  #wa-translator-controls select { min-width: 84px; max-width: 110px; }
+}
+
+:where(.dark, [data-theme="dark"]) #wa-translator-controls :is(button, select) {
+  background: #24343c;
+  border-color: #405159;
+  color: #e1e9e7;
+}
+:where(.dark, [data-theme="dark"]) #wa-translator-controls button[data-primary="true"] {
+  background: #087f65;
+  border-color: #087f65;
+  color: white;
+}
+:where(.dark, [data-theme="dark"]) :is(.wa-translator-message-actions button, .wa-translator-speak-button) {
+  color: #82d9bb;
+  background: rgba(130, 217, 187, .08);
+  border-color: rgba(130, 217, 187, .18);
+}
+:where(.dark, [data-theme="dark"]) .wa-translator-message-result { color: #d8e5e0; }
+
+/* Reserve a separate row when WhatsApp uses a flex composer footer. */
+footer:has(> #wa-translator-controls) { flex-wrap: wrap; }
+#wa-translator-controls { visibility: visible; opacity: 1; position: relative; }
+.wa-translator-message-actions { visibility: visible; opacity: 1; position: relative; }
