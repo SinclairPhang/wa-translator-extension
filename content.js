@@ -10,6 +10,19 @@
   ].join(",");
 
   const preparedDrafts = new WeakMap();
+  function currentChatTitle() {
+    const node=document.querySelector('#main [data-testid="conversation-info-header-chat-title"]');
+    return (node?.textContent || "").normalize("NFKC").trim();
+  }
+  function titleChatId() {
+    const title=currentChatTitle();
+    if(!title) return "";
+    // A visible duplicate name is ambiguous; do not share its stored settings.
+    const rows=[...document.querySelectorAll('#pane-side [role="row"]')];
+    const matches=rows.filter(row=>[...row.querySelectorAll('[title]')].some(n=>(n.getAttribute('title') || "").normalize("NFKC").trim()===title));
+    if(matches.length>1) return "";
+    return `title:${encodeURIComponent(title)}`;
+  }
   function currentChatId() {
     const input = getComposerInput();
     let scope = input?.closest("#main, [role='main']") || document.querySelector("#main");
@@ -24,14 +37,41 @@
     const nodes = bubbles.length ? bubbles.map(node => node.closest("[data-id]") || node.querySelector("[data-id]")).filter(Boolean)
       : [...scope.querySelectorAll("[data-id]")].filter(node=>!node.closest("blockquote, [data-testid*='quoted'], header, footer"));
     const ids=nodes.map(node=>node.getAttribute("data-id")?.match(/^(?:true|false)_([^_]+@(?:c\.us|s\.whatsapp\.net|g\.us|lid))_/i)?.[1]).filter(Boolean);
-    return ids.length && ids.every(id=>id===ids[0]) ? ids[0] : "";
+    if(ids.length) return ids.every(id=>id===ids[0]) ? ids[0] : "";
+    return titleChatId();
   }
 
   let lastChatId = "";
-  const chatSettings = defaults => readSettings(defaults, currentChatId());
+  let temporaryLanguage = null;
+  function languageContext() {
+    return {id:currentChatId(), input:getComposerInput(), title:currentChatTitle()};
+  }
+  function sameLanguageContext(a,b) {
+    return a.id===b.id && a.input===b.input && a.title===b.title;
+  }
+  function currentLanguageOverride() {
+    if(temporaryLanguage && !sameLanguageContext(temporaryLanguage.context,languageContext())) temporaryLanguage=null;
+    return temporaryLanguage?.settings || {};
+  }
+  async function setChatLanguage(updates) {
+    const context=languageContext();
+    temporaryLanguage={context,settings:{...updates}};
+    if(!context.id) return false;
+    try { await saveChatSettings(context.id, updates); return true; }
+    catch (_) { return false; }
+  }
+  // Invalidate temporary choices before another sidebar conversation opens.
+  document.addEventListener("pointerdown", event => {
+    if(event.target?.closest?.("#pane-side [role='row'], #pane-side [data-id], #side [role='row']")) temporaryLanguage=null;
+  },true);
+  const chatSettings = async defaults => {
+    const context=languageContext();
+    const settings=await readSettings(defaults,context.id);
+    return sameLanguageContext(context,languageContext()) ? {...settings,...currentLanguageOverride()} : settings;
+  };
   chrome.runtime.onMessage.addListener((message, sender, respond) => {
     if(message?.type === "GET_CHAT_CONTEXT") {
-      respond({chatId:currentChatId(), label:document.querySelector("#main header [title]")?.getAttribute("title") || "当前聊天"});
+      respond({chatId:currentChatId(), label:currentChatTitle() || "当前聊天"});
     }
   });
   let busy = false;
@@ -134,7 +174,7 @@
 
     preparedDrafts.delete(input);
     const footer = input.closest("footer");
-    const chatTitle = () => document.querySelector("#main header [title]")?.getAttribute("title") || "";
+    const chatTitle = () => currentChatTitle();
     const initialChatTitle = chatTitle();
     let cancelled = false;
     const cancel = (event) => {
@@ -328,10 +368,9 @@
         if(!language?.trim() || chatId!==currentChatId()) { await syncTargetLanguageSelect(select); return; }
         updates.customLanguage=language.trim();
       }
-      try { await saveChatSettings(chatId, updates); }
-      catch(error) { showToast(error.message,"error",3000); await syncTargetLanguageSelect(select); return; }
+      const remembered=await setChatLanguage(updates);
       if(chatId!==currentChatId()) { await syncTargetLanguageSelect(select); return; }
-      showToast(`已记住此聊天的语言：${updates.customLanguage || select.selectedOptions[0]?.textContent || chosen}`, "success", 1800);
+      showToast(`${remembered ? "已记住此聊天的语言" : "已切换语言（本次聊天生效）"}：${updates.customLanguage || select.selectedOptions[0]?.textContent || chosen}`, "success", 1800);
     });
 
     select.addEventListener("click", (event) => event.stopPropagation());
@@ -375,7 +414,7 @@
     }
 
     try {
-      return await chrome.runtime.sendMessage({...message, chatId:currentChatId()});
+      return await chrome.runtime.sendMessage({...message, chatId:currentChatId(), languageSettings:currentLanguageOverride()});
     } catch (error) {
       const detail = error?.message || String(error);
       if (/context invalidated|Extension context invalidated|receiving end does not exist/i.test(detail)) {

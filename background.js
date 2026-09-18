@@ -20,6 +20,7 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === "TRANSLATE_TEXT" || message.type === "TRANSLATE_ANY_TEXT") {
     operation = translateMessage(message.text, {
       chatId: message.chatId,
+      languageSettings: message.languageSettings,
       force: message.type === "TRANSLATE_ANY_TEXT",
       targetLanguage: message.targetLanguage,
       appendOriginal: message.appendOriginal
@@ -105,6 +106,9 @@ async function getSettings() {
 
 async function translateMessage(text, options = {}) {
   const settings = await readSettings(WA_TRANSLATOR_DEFAULTS, options.chatId);
+  for(const key of ["targetLanguage","customLanguage"]) {
+    if(typeof options.languageSettings?.[key] === "string") settings[key]=options.languageSettings[key];
+  }
   const trimmed = String(text || "").trim();
 
   if (!trimmed) {

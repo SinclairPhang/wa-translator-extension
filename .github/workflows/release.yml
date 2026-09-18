@@ -1,13 +1,13 @@
-name: Publish v1.0.0
+name: Publish v1.0.2
 on:
   push:
     branches: [main]
-    paths: ['dist/wa-translator-extension-v1.0.0.zip']
+    paths: ['dist/wa-translator-extension-v1.0.2.zip']
   workflow_dispatch:
 permissions:
   contents: write
 concurrency:
-  group: release-v1.0.0
+  group: release-v1.0.2
   cancel-in-progress: false
 jobs:
   release:
@@ -17,20 +17,20 @@ jobs:
       - name: Verify package
         run: |
           cd dist
-          sha256sum -c wa-translator-extension-v1.0.0.sha256
-          unzip -t wa-translator-extension-v1.0.0.zip
+          sha256sum -c wa-translator-extension-v1.0.2.sha256
+          unzip -t wa-translator-extension-v1.0.2.zip
       - name: Publish first stable release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          if gh release view v1.0.0 >/dev/null 2>&1; then
-            echo 'Release v1.0.0 already exists; leaving it unchanged.'
+          if gh release view v1.0.2 >/dev/null 2>&1; then
+            echo 'Release v1.0.2 already exists; leaving it unchanged.'
             exit 0
           fi
-          gh release create v1.0.0 \
+          gh release create v1.0.2 \
             --target "$GITHUB_SHA" \
-            --title 'v1.0.0 · WhatsApp 翻译助手首个正式版' \
-            --notes-file CHANGELOG.md \
+            --title 'v1.0.2 · WhatsApp 翻译助手联系人识别修复' \
+            --notes-file RELEASE_NOTES.md \
             --latest \
-            dist/wa-translator-extension-v1.0.0.zip \
-            dist/wa-translator-extension-v1.0.0.sha256
+            dist/wa-translator-extension-v1.0.2.zip \
+            dist/wa-translator-extension-v1.0.2.sha256
